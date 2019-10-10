@@ -1,0 +1,38 @@
+# traefik.toml
+[entryPoints]
+  [entryPoints.web]
+    address = ":80"
+
+  [entryPoints.web-secure]
+    address = ":443"
+
+[certificatesResolvers.sample.acme]
+  email = "mark@grayszone.com"
+  storage = "/acme/acme.json"
+  caServer = "https://acme-staging-v02.api.letsencrypt.org/directory"
+  [certificatesResolvers.sample.acme.httpChallenge]
+    entryPoint = "web"
+
+[http.routers]
+  [http.routers.router0]
+    service = "lab-scorer"
+    entryPoints = ["web"]
+    middlewares = ["redirect"]
+
+  [http.routers.router1]
+    service = "lab-scorer"
+    entryPoints = ["web-secure"]
+
+[http.middlewares]
+  [http.middlewares.redirect.redirectScheme]
+    scheme = "https"
+
+[http.services]
+  [http.services.lab-scorer.loadBalancer]
+    [[http.services.lab-scorer.loadBalancer.servers]]
+      url = "http://locahost:8080/"
+
+[log]
+  level = "DEBUG"
+  filePath = "/logs/traefik.log"
+  format = "json"
